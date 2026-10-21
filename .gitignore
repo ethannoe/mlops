@@ -1,0 +1,8 @@
+# Le modèle est régénéré avec `python train_model.py` (et pendant le docker build)
+regression.joblib
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
