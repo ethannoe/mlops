@@ -1,7 +1,14 @@
+from pathlib import Path
+
+import joblib
+import pandas as pd
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+MODEL_PATH = Path(__file__).parent / "regression.joblib"
+
 app = FastAPI(title="Houses price prediction")
+model = joblib.load(MODEL_PATH)
 
 
 class House(BaseModel):
@@ -12,4 +19,6 @@ class House(BaseModel):
 
 @app.post("/predict")
 def predict(house: House):
-    return {"y_pred": 2}
+    features = pd.DataFrame([house.model_dump()])
+    y_pred = model.predict(features)[0]
+    return {"y_pred": float(y_pred)}
