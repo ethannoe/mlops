@@ -16,7 +16,7 @@ REMOTE_USER=${4:-ubuntu}
 TARGET="$REMOTE_USER@$HOST"
 REMOTE_DIR="/home/$REMOTE_USER/$INITIALS"
 NAME="$INITIALS-houses-api"
-SSH_OPTS=(-o ControlMaster=auto -o "ControlPath=/tmp/ssh-tp-%r@%h:%p" -o ControlPersist=120)
+SSH_OPTS=(-o ControlMaster=auto -o "ControlPath=/tmp/ssh-tp-%r@%h:%p" -o ControlPersist=600)
 
 cd "$(dirname "$0")/.."
 
@@ -30,10 +30,14 @@ echo ">> docker build + docker run (port $PORT de la VM -> 8000 du conteneur)"
 ssh "${SSH_OPTS[@]}" "$TARGET" bash -s <<EOF
 set -e
 cd $REMOTE_DIR
+command -v docker > /dev/null || { echo "Docker n'est pas installé sur la VM."; exit 1; }
 DOCKER=docker
 docker info > /dev/null 2>&1 || DOCKER="sudo docker"
-\$DOCKER build -t $NAME .
+# Remplace un déploiement précédent : ancien conteneur, ou uvicorn du niveau 0.5 sur le même port
 \$DOCKER rm -f $NAME > /dev/null 2>&1 || true
+if [ -f uvicorn.pid ]; then kill \$(cat uvicorn.pid) 2>/dev/null || true; rm -f uvicorn.pid; sleep 1; fi
+if ss -ltn | grep -q ":$PORT "; then echo "Le port $PORT est déjà utilisé sur la VM, choisis-en un autre."; exit 1; fi
+\$DOCKER build -t $NAME .
 \$DOCKER run -d --name $NAME --restart unless-stopped -p $PORT:8000 $NAME
 sleep 3
 \$DOCKER ps --filter name=$NAME
