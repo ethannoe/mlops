@@ -15,6 +15,15 @@ une app Streamlit, une API FastAPI, et la même API dans un conteneur Docker sur
 
 L'historique git suit les étapes du TP (un commit par étape).
 
+## Déploiement en ligne
+
+Le conteneur tourne sur la VM `40.66.48.24`, dans `/home/ubuntu/ENA` :
+
+- Swagger : http://40.66.48.24:8878/docs
+- Prédiction : `POST http://40.66.48.24:8878/predict`
+
+Le pare-feu de la VM ne laisse passer que les ports en 8xxx (le 9878 est bloqué depuis l'extérieur).
+
 ## Installation
 
 ```bash
@@ -100,7 +109,8 @@ Le modèle est entraîné pendant le `docker build`, donc la version de scikit-l
 ```
 
 Le script copie le code dans `/home/ubuntu/<initiales>`, lance `docker build`, puis
-`docker run -d --restart unless-stopped -p <port>:8000`. Le conteneur s'appelle `<initiales>-houses-api`.
+`docker run -d --restart unless-stopped -p <port>:8000`. Le conteneur s'appelle `<initiales en minuscules>-houses-api`
+(Docker refuse les majuscules dans les noms d'image). Il remplace le uvicorn du niveau 0.5 s'il tournait dans le même dossier.
 
 Vérification : `python test_api.py http://<IP>:<port>`, ou `http://<IP>:<port>/docs` dans le navigateur.
 Si le port ne répond pas depuis l'extérieur, il est sans doute bloqué par le pare-feu ou le security group de la VM.

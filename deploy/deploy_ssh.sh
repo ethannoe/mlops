@@ -37,8 +37,11 @@ fi
 .venv/bin/python train_model.py
 nohup .venv/bin/uvicorn main:app --host 0.0.0.0 --port $PORT > uvicorn.log 2>&1 < /dev/null &
 echo \$! > uvicorn.pid
-sleep 3
-curl -s -X POST localhost:$PORT/predict -H 'Content-Type: application/json' -d '{"size":150,"nb_rooms":2,"garden":1}'
+# Le premier démarrage peut être lent (import de pandas/scikit-learn) : on attend jusqu'à 60 s
+for i in \$(seq 1 60); do
+  curl -sf -X POST localhost:$PORT/predict -H 'Content-Type: application/json' -d '{"size":150,"nb_rooms":2,"garden":1}' && break
+  sleep 1
+done
 echo
 EOF
 
