@@ -14,7 +14,7 @@ INITIALS=$2
 PORT=$3
 REMOTE_USER=${4:-ubuntu}
 TARGET="$REMOTE_USER@$HOST"
-SSH_OPTS=(-o ControlMaster=auto -o "ControlPath=/tmp/ssh-tp-%r@%h:%p" -o ControlPersist=600)
+SSH_OPTS=(-o ConnectTimeout=15 -o ControlMaster=auto -o "ControlPath=/tmp/ssh-tp-%r@%h:%p" -o ControlPersist=600)
 
 cd "$(dirname "$0")/.."
 
